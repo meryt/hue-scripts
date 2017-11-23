@@ -1,0 +1,10 @@
+
+// Put the IP address of your Hub
+exports.hub = '192.168.111.1';
+// Put your 40 char API key
+exports.apikey = 'foo';
+
+exports.huejay = new (require('huejay')).Client({
+    host: exports.hub,
+    username: exports.apikey
+});

@@ -1,0 +1,14 @@
+{
+  "name": "hue-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for modifying Hue rules",
+  "main": "list-lights.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "huejay": "^1.7.1"
+  },
+  "author": "meryt@meryt.com",
+  "license": "ISC"
+}
