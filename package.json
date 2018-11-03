@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "colors": "^1.1.2",
-    "huejay": "^1.7.1"
+    "huejay": "^1.7.1",
     "lodash.sample": "^4.2.1",
     "randomcolor": "^0.5.3"
   },
