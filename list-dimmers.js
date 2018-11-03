@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var config = require('./config.js');
+var colors = require('colors');
 
 var client = config.huejay;
 
@@ -29,7 +30,7 @@ client.sensors.getAll()
         if (index > -1) {
           foundMatch = true;
         }
-        printDimmer(sensor);
+        printDimmer(sensor, foundMatch);
         if (foundMatch) {
           loadRules(index);
         }
@@ -46,8 +47,13 @@ client.sensors.getAll()
   });
 
 
-function printDimmer(sensor) {
-  console.log(`Sensor [${sensor.id}]: ${sensor.name}`);
+function printDimmer(sensor, showingSingleItem) {
+
+  if (showingSingleItem) {
+    console.log(`[${sensor.name}]`.yellow);
+  } else {
+    console.log(`Sensor [`.white + `${sensor.id}`.green + `]:`.white + ` ${sensor.name}`.yellow);
+  }
   verbose && console.log(`  Type:             ${sensor.type}`);
   verbose && console.log(`  Manufacturer:     ${sensor.manufacturer}`);
   verbose && console.log(`  Model Id:         ${sensor.modelId}`);
@@ -119,7 +125,8 @@ function assembleRule(rule, sensor) {
   var item = {
     'rule': rule.id,
     'actions': [],
-    'isRelease': false
+    'isRelease': false,
+    'condition': ''
   };
 
   verbose && console.log(`Rule [${rule.id}]: ${rule.name}`);
@@ -149,12 +156,16 @@ function assembleRule(rule, sensor) {
         item.button = condition.value;
       }
     } else if (isCounterCondition(condition)) {
+      item.conditionSensor = sensorNameFromCondition(condition);
       if (condition.operator == 'eq') {
         item.count = parseInt(condition.value) + 1;
+        item.condition = '= ' + condition.value;
       } else if (condition.operator == 'lt') {
         item.count = parseInt(condition.value);
+        item.condition = '< ' + condition.value;
       } else if (condition.operator == 'gt') {
         item.count = parseInt(condition.value) + 2;
+        item.condition = '> ' + condition.value;
       } else {
         throw "Unknown condition operator " + condition.operator;
       }
@@ -200,6 +211,8 @@ function assembleRule(rule, sensor) {
       verbose && console.log(`    Body:    ${JSON.stringify(action.body)}`);
     } else if (isCounterAction(action)) {
       // Probably don't need to display these
+      act.name = "SET COUNTER " + counterNameFromAddress(action.address);
+      act.nextStatus = action.body.status;
       verbose && console.log(`    Address: ${action.address}`);
       verbose && console.log(`    Method:  ${action.method}`);
       verbose && console.log(`    Body:    ${JSON.stringify(action.body)}`);
@@ -220,7 +233,34 @@ function printRule(item) {
   if (!verbose && item.isRelease) {
     return;
   }
-  console.log(`[Rule ${item.rule}] Button ${item.button} ${item.isLongPress ? 'long ' : ''}${item.isRelease ? 'release' : 'press'} ${(typeof(item.count) == 'undefined' ? '' : item.count)}`);
+  var buttonColor;
+  if (item.button == 1) {
+    buttonColor = colors.cyan;
+  } else if (item.button == 2) {
+    buttonColor = colors.yellow;
+  } else if (item.button == 3) {
+    buttonColor = colors.blue;
+  } else if (item.button == 4) {
+    buttonColor = colors.magenta;
+  } else {
+    buttonColor = colors.red;
+  }
+
+  var pressColor = colors.white;
+  if (item.isLongPress) {
+    pressColor = colors.white.italic;
+  }
+
+  var message = buttonColor(`Button ${item.button}`);
+  message += pressColor(
+      ` ${item.isLongPress ? 'long ' : ''}${item.isRelease ? 'release' : 'press'}${(typeof(item.count) == 'undefined' ? '' : ' ' + item.count)}`);
+  message +=
+      ` [Rule ${item.rule}]`.gray;
+  if (typeof(item.conditionSensor) == 'string') {
+    message += ` (Sensor ${item.conditionSensor} ${item.condition})`.green.dim;
+  }
+
+  console.log(message);
   printActions(item.actions);
   console.log();
 }
@@ -264,6 +304,15 @@ function isCounterCondition(condition) {
   return /\/sensors\/\d+\/state\/status/.exec(condition.address);
 }
 
+function sensorNameFromCondition(condition) {
+  var res = /\/sensors\/(\d+)\/state\/status/.exec(condition.address);
+  if (res == null) {
+    return null;
+  } else {
+    return res[1];
+  }
+}
+
 function isGroupAction(action) {
   return /\/groups\//.exec(action.address);
 }
@@ -274,6 +323,10 @@ function isSpecialGroupAction(action) {
 
 function isCounterAction(action) {
   return /\/sensors\/\d+\/state/.exec(action.address);
+}
+
+function counterNameFromAddress(address) {
+  return /\/sensors\/(\d+)\//.exec(address)[1];
 }
 
 function groupNameFromAction(action) {
@@ -303,10 +356,16 @@ function actionDisplayString(action) {
 
 function printActions(actions) {
   for (let action of actions) {
-    if (/^Turn /.exec(action.action)) {
-      console.log('  ' + action.action + ' ' + action.name + (typeof(action.scene) == 'string' ? ' (' + action.scene + ')' : ''));
-    } else if (/^DIM/.exec(action.action)) {
-      console.log('  ' + action.action + ' ' + action.name + ' by ' + action.brighten);
+    if (/^Turn ON/.exec(action.action)) {
+      console.log('  ' + action.action.green + ' ' + action.name + (typeof(action.scene) == 'string' ? ' (' + action.scene + ')' : ''));
+    } else if (/^Turn OFF/.exec(action.action)) {
+        console.log('  ' + action.action.red + ' ' + action.name + (typeof(action.scene) == 'string' ? ' (' + action.scene + ')' : ''));
+    } else if (/^DIM UP/.exec(action.action)) {
+      console.log('  ' + action.action.white + ' ' + action.name + ' by ' + action.brighten);
+    } else if (/^DIM DOWN/.exec(action.action)) {
+      console.log('  ' + action.action.white.italic + ' ' + action.name + ' by ' + action.brighten);
+    } else if (/^SET COUNTER/.exec(action.name)) {
+      console.log(`  ${action.name} to ${action.nextStatus}`.green.dim);
     } else {
       console.log('  ' + JSON.stringify(action));
     }
