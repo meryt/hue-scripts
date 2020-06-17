@@ -1,13 +1,5 @@
 #!/usr/bin/env node
 
-// Usage:
-//
-// randrgb --- get 10 random colors of random lightness
-// randrgb [bright|light|dark] ---- get 10 random colors of this luminosity
-// randrgb <huename> --- get 10 random colors of this hue
-//      (red, orange, yellow, green, blue, purple, pink, monochrome (for grays))
-// randrgb [bright|light|dark] <huename> ---- get 10 colors of this lightness & hue
-
 var randomColor = require ('randomcolor');
 var sample = require('lodash.sample');
 var config = require('./config.js');
@@ -15,7 +7,7 @@ var config = require('./config.js');
 var client = config.huejay;
 
 var lights = [
-    {"id": 25}, // black desk lamp candle bulb
+    {"id": 25}, // 25 = black desk lamp candle bulb
 ];
 
 // brightness of lamp; values range between 0 and 255
@@ -24,6 +16,8 @@ var brightnesses = {
     'light': 160,
     'bright': 255
 }
+
+
 
 // Initialize by picking  a random hue from the list. Some colors are more likely than others.
 var hue = sample(['red', 'red', 'orange', 'yellow', 'green', 'green', 'blue', 'blue', 'purple', 'purple', 'pink', 'pink', 'random']);
