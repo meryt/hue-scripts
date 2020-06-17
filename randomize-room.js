@@ -21,7 +21,7 @@ var lights = [
 ];
 
 // Initialize by picking  a random hue from the list
-var hue = sample(['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'random']);
+var hue = sample(['red', 'red', 'orange', 'yellow', 'green', 'green', 'blue', 'blue', 'purple', 'purple', 'pink', 'pink', 'random']);
 var luminosity = 'bright';
 var count = 3;
 
@@ -39,6 +39,9 @@ if (process.argv.length == 4) {
         hue = v;
     }
 }
+
+console.log(`Setting lights to ${luminosity} ${hue}`);
+
 
 var options = {
     format: 'hsl',
@@ -60,7 +63,8 @@ if (typeof(colorstr) == 'object') {
 function hslToHue(hsl) {
     var regex = /hsl\((\d+), .+/;
     var matches = regex.exec(hsl);
-    console.log("Hue is " + hslHueToHueHue(matches[1]));
+    var hue = hslHueToHueHue(matches[1]);
+    return hue;
 }
 
 function hslHueToHueHue(hue) {
@@ -79,7 +83,7 @@ function setLightToColor(lightId, brightness, color) {
             return client.lights.save(light);
         })
         .then(light => {
-            console.log(`Updated light [${light.id}]`);
+            //console.log(`Updated light [${light.id}]`);
         })
         .catch(error => {
             console.log(error.stack);
