@@ -79,6 +79,7 @@ function setLightToColor(lightId, brightness, color) {
             light.brightness = brightness;
             light.hue        = color;
             light.saturation = 255;
+            light.on = true;
 
             return client.lights.save(light);
         })
