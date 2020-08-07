@@ -8,3 +8,9 @@ exports.huejay = new (require('huejay')).Client({
     host: exports.hub,
     username: exports.apikey
 });
+
+// Put your open weather map API key here if you want to use the weather script
+exports.openWeatherApiKey = 'foo';
+// Put your latitude and longitude here if you want to use the weather script
+exports.lat = 58.40;
+exports.lon = -122.42;

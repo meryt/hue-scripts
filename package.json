@@ -8,9 +8,12 @@
   },
   "dependencies": {
     "colors": "^1.1.2",
+    "hsl-to-rgb-for-reals": "^1.1.1",
     "huejay": "^1.7.1",
     "lodash.sample": "^4.2.1",
-    "randomcolor": "^0.5.3"
+    "moment": "^2.27.0",
+    "randomcolor": "^0.5.3",
+    "request": "^2.88.2"
   },
   "author": "meryt@meryt.com",
   "license": "ISC"
