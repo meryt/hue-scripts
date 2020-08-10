@@ -31,6 +31,7 @@ let lights = [
     {"id": 30, "brightness": 128}, // brian
     {"id": 32, "brightness": 128}, // upstairs hallway 3
     {"id": 33, "brightness": 128}, // upstairs hallway 4
+    {"id": 31, "brightness": 128}, // bedroom globe
 ];
 let chandelierBulbs = [lights[0], lights[1], lights[2], lights[3], lights[4]];
 
@@ -45,6 +46,7 @@ if (useRealWeather) {
 
 function setLightsFromWeather(weather) {
 	setHallwayFromCurrentConditions(weather, lights[5], lights[6]);
+	setBedroomGlobeFromNextHourForecast(weather, lights[7]);
 	setChandelierFromHourlyForecast(weather, 4);
 }
 
@@ -122,6 +124,26 @@ function setChandelierFromHourlyForecast(weather, numHoursPerBulb) {
 	}	
 }
 
+function setBedroomGlobeFromNextHourForecast(weather, light) {
+	var nextHour = weather.hourly[1];
+	var temp = nextHour.temp;
+	var description = nextHour.weather[0].description;
+	var pop = nextHour.pop;
+
+	var newHue = hueFromTemp(temp, pop >= 0.3);
+	var hueHue = Utils.hslHueToHueHue(newHue);
+	var start = moment.unix(nextHour.dt);
+	var end = moment.unix(nextHour.dt).add(1, 'hours');
+
+    let logline = `Next hour:   Temperature  ${formatTemp(temp)}C,  precip. chance ${String(Math.round(pop * 100)).padStart(2, ' ')}%,  ${description}`;
+	console.log(Utils.colorizeForeground(Utils.hueToRgb(newHue), logline));
+
+	var bulbId = light.id;
+	var bulbBright = light.brightness;
+
+	Utils.setLightToHue(client, bulbId, bulbBright, hueHue);
+
+}
 
 function formatHour(mom) {
 	return mom.format('h A').padStart(5, ' ');
