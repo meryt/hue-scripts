@@ -45,24 +45,25 @@ if (useRealWeather) {
 
 
 function setLightsFromWeather(weather) {
-	setHallwayFromCurrentConditions(weather, lights[5], lights[6]);
-	setBedroomGlobeFromNextHourForecast(weather, lights[7]);
+	let currentlyRaining = isRaining(weather)
+	setHallwayFromCurrentConditions(weather, currentlyRaining, lights[5], lights[6]);
+	setBedroomGlobeFromCurrentHourForecast(weather, currentlyRaining, lights[7]);
 	setChandelierFromHourlyForecast(weather, 4);
 }
 
+function isRaining(weather) {
+	let currentCode = weather.current.weather[0].id;
+	let codeGroup = String(currentCode).substring(0, 1);
+	return ['2', '3', '5', '6'].includes(codeGroup); // see averageWeather function for explanation
+}
 
-function setHallwayFromCurrentConditions(weather, tempBulb, conditionBulb) {
+function setHallwayFromCurrentConditions(weather, isRaining, tempBulb, conditionBulb) {
 	let currentRainMm = weather.current.rain ? weather.current.rain['1h'] : 0;
 	let currentTemp = weather.current.temp;
 	let currentWeather = weather.current.weather[0].description;
 	let feelsLike = weather.current.feels_like;
-	let currentCode = weather.current.weather[0].id;
 
-
-	let codeGroup = String(currentCode).substring(0, 1);
-	let isRaining = ['2', '3', '5', '6'].includes(codeGroup); // see averageWeather function for explanation
-
-	let tempBulbHue = hueFromTemp(currentTemp, false);
+	let tempBulbHue = hueFromTemp(currentTemp, isRaining);
 	let conditionBulbHue = hueFromTemp(currentTemp, true);
 	if (!isRaining) {
 		conditionBulbHue = hueFromTemp(feelsLike, false);
@@ -124,18 +125,19 @@ function setChandelierFromHourlyForecast(weather, numHoursPerBulb) {
 	}	
 }
 
-function setBedroomGlobeFromNextHourForecast(weather, light) {
-	var nextHour = weather.hourly[1];
+function setBedroomGlobeFromCurrentHourForecast(weather, isRaining, light) {
+	var nextHour = weather.hourly[0];
 	var temp = nextHour.temp;
 	var description = nextHour.weather[0].description;
 	var pop = nextHour.pop;
+	var isOrWillRaining = isRaining || pop >= 0.3;
 
-	var newHue = hueFromTemp(temp, pop >= 0.3);
+	var newHue = hueFromTemp(temp, isOrWillRaining);
 	var hueHue = Utils.hslHueToHueHue(newHue);
 	var start = moment.unix(nextHour.dt);
 	var end = moment.unix(nextHour.dt).add(1, 'hours');
 
-    let logline = `Next hour:   Temperature  ${formatTemp(temp)}C,  precip. chance ${String(Math.round(pop * 100)).padStart(2, ' ')}%,  ${description}`;
+    let logline = `This hour:   Temperature  ${formatTemp(temp)}C,  precip. chance ${String(Math.round(pop * 100)).padStart(2, ' ')}%,  ${description}`;
 	console.log(Utils.colorizeForeground(Utils.hueToRgb(newHue), logline));
 
 	var bulbId = light.id;
