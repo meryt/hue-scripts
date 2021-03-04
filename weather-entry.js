@@ -20,7 +20,10 @@ const MIN_HUE_PRECIP = HSL_VIOLET;
 const MAX_HUE_PRECIP = HSL_BLUE;
 
 const MIN_TEMP = -10;
-const MAX_TEMP = 32;
+const MAX_TEMP = 30;
+
+// Min percent chance of precip to change to blue
+const PRECIP_THRESHOLD = 0.4;
 
 
 let lights = [
@@ -105,7 +108,7 @@ function setChandelierFromHourlyForecast(weather, numHoursPerBulb) {
 		}
 		var avgTemp = totalTemp / numHoursPerBulb;
 
-		var newHue = hueFromTemp(avgTemp, maxPop >= 0.30);
+		var newHue = hueFromTemp(avgTemp, maxPop >= PRECIP_THRESHOLD);
 		var hueHue = Utils.hslHueToHueHue(newHue);
 
 		var start = moment.unix(firstHour.dt);
@@ -130,7 +133,7 @@ function setBedroomGlobeFromCurrentHourForecast(weather, isRaining, light) {
 	var temp = nextHour.temp;
 	var description = nextHour.weather[0].description;
 	var pop = nextHour.pop;
-	var isOrWillRaining = isRaining || pop >= 0.3;
+	var isOrWillRaining = isRaining || pop >= PRECIP_THRESHOLD;
 
 	var newHue = hueFromTemp(temp, isOrWillRaining);
 	var hueHue = Utils.hslHueToHueHue(newHue);
