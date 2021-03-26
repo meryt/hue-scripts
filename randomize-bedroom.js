@@ -17,7 +17,7 @@ var client = config.huejay;
 var lights = [
     {"id": 4, "brightness": 255}, // bedside lamp
     {"id": 35, "brightness": 128}, // ceiling 1
-    {"id": 36, "brightness": 128} // ceiling 2
+    {"id": 38, "brightness": 128} // ceiling 2
 ];
 
 // Initialize by picking  a random hue from the list
