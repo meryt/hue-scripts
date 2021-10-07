@@ -75,7 +75,7 @@ function loadRules(sensor) {
   client.groups.getAll()
     .then(groups => {
         for (let group of groups){
-          allGroups[group.id] = group.name;
+          allGroups[group.id] = `[${group.id}] ${group.name}`;
         }
 
         client.scenes.getAll()

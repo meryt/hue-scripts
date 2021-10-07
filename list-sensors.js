@@ -25,7 +25,7 @@ function defined(light, prop) {
 client.sensors.getAll()
   .then(sensors => {
     for (let sensor of sensors) {
-      if (index < 0 || index == sensor.id) {
+      if (index < 0 || (index == sensor.id && !verbose)) {
         foundMatch = true;
         console.log(`Sensor [${sensor.id}]: ${sensor.name}`);
         console.log(`  Type:             ${sensor.type}`);
@@ -48,8 +48,17 @@ client.sensors.getAll()
         if (defined(sensor.state, 'status')) {
           console.log(`    Status:         ${sensor.state.status}`);
         }
+        if (defined(sensor.state, 'temperature')) {
+          console.log(`    Temperature:    ${sensor.state.temperature}`); 
+        }
         console.log();
       }
+
+      if (index >= 0 && index == sensor.id && verbose) {
+        foundMatch = true;
+        console.log(sensor.state);
+      }
+
     }
 
       if (!foundMatch) {
