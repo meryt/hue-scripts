@@ -189,13 +189,12 @@ function setNewChandelierFromHourlyForecast(weather) {
 		var hueHue = Utils.hslHueToHueHue(newHue);
 
 		bulbSetting['averageWeather'] = averageWeather(weathers)
-		bulbSetting['start'] = hours[idx]['hour']
+		bulbSetting['start'] = hours[idx] ? hours[idx]['hour'] : '     '
 		bulbSetting['end'] = hours[idx2]['hour']
 		bulbSetting['avgTemp'] = avgTemp
 		bulbSetting['pop'] = maxPop
 
 		let logline = `${bulbSetting['start']} - ${bulbSetting['end']}: Avg. temp  ${formatTemp(bulbSetting['avgTemp'])}C,  precip. chance ${String(Math.round(bulbSetting['pop'] * 100)).padStart(2, ' ')}%,  ${bulbSetting.averageWeather.description}`;
-		//console.log(logline)
 
 		console.log(Utils.colorizeForeground(Utils.hueToRgb(newHue), logline));
 
@@ -206,9 +205,6 @@ function setNewChandelierFromHourlyForecast(weather) {
 
 
 	}
-
-
-	//console.log(hours)
 
 }
 
