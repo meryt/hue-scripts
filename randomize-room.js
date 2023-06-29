@@ -15,9 +15,9 @@ var config = require('./config.js');
 var client = config.huejay;
 
 var lights = [
-    {"id": 5, "brightness": 255}, // lamp
-    {"id": 20, "brightness": 128}, // ceiling 1
-    {"id": 37, "brightness": 128} // ceiling 2
+    {"id": 12, "brightness": 255}, // lamp
+//    {"id": 20, "brightness": 128}, // ceiling 1
+//    {"id": 37, "brightness": 128} // ceiling 2
 ];
 
 // Initialize by picking  a random hue from the list
