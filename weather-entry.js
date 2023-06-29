@@ -27,16 +27,17 @@ const PRECIP_THRESHOLD = 0.4;
 
 
 let lights = [
-    {"id": 29, "brightness": 128}, // enguerrand
-    {"id": 26, "brightness": 128}, // bob
-    {"id": 28, "brightness": 128}, // joey
-    {"id": 27, "brightness": 128}, // frank
-    {"id": 30, "brightness": 128}, // brian
+    {"id": 4, "brightness": 128}, // candle 8 o'clock
+    {"id": 7, "brightness": 128}, // 6 o'clock
+    {"id": 8, "brightness": 128}, // 4 o'clock
+    {"id": 9, "brightness": 128}, // 10 o'clock
+    {"id": 10, "brightness": 128}, // 12 o'clock
+    {"id": 11, "brightness": 128}, // 2 o'clock
     {"id": 32, "brightness": 128}, // upstairs hallway 3
     {"id": 33, "brightness": 128}, // upstairs hallway 4
     {"id": 31, "brightness": 128}, // bedroom globe
 ];
-let chandelierBulbs = [lights[0], lights[1], lights[2], lights[3], lights[4]];
+let chandelierBulbs = [lights[4], lights[5], lights[2], lights[1], lights[0], lights[3]];
 
 let useRealWeather = true;
 if (useRealWeather) {
@@ -49,9 +50,10 @@ if (useRealWeather) {
 
 function setLightsFromWeather(weather) {
 	let currentlyRaining = isRaining(weather)
-	setHallwayFromCurrentConditions(weather, currentlyRaining, lights[5], lights[6]);
-	setBedroomGlobeFromCurrentHourForecast(weather, currentlyRaining, lights[7]);
-	setChandelierFromHourlyForecast(weather, 4);
+	//setHallwayFromCurrentConditions(weather, currentlyRaining, lights[5], lights[6]);
+	//setBedroomGlobeFromCurrentHourForecast(weather, currentlyRaining, lights[7]);
+	//setChandelierFromHourlyForecast(weather, 2);
+	setNewChandelierFromHourlyForecast(weather);
 }
 
 function isRaining(weather) {
@@ -128,6 +130,88 @@ function setChandelierFromHourlyForecast(weather, numHoursPerBulb) {
 	}	
 }
 
+function setNewChandelierFromHourlyForecast(weather) {
+
+	var firstHourWeather = weather.hourly[0]
+	var firstHour = hourFromHourlyWeather(firstHourWeather); 
+	var numReadings = 12;
+	if (firstHour % 2) {
+		numReadings = 11;
+	}
+
+	const hours = {};
+
+	for (var i = 0; i < numReadings; i++) {
+		let hourlyWeather = weather.hourly[i]
+		let hour = hourFromHourlyWeather(hourlyWeather)
+		hours[hour] = {};
+		hours[hour]['hour'] = formatHour(moment.unix(hourlyWeather.dt))
+		hours[hour]['temp'] = hourlyWeather.temp;
+		hours[hour]['description'] = hourlyWeather.weather[0].description;
+		hours[hour]['weather'] = hourlyWeather.weather[0];
+		hours[hour]['pop'] = hourlyWeather.pop;
+	}
+
+	const bulbSettings = {}
+
+	for (var i = 0; i < 12; i+= 2) {
+		
+		let totalTemp = 0
+		let maxPop = 0
+		let numReadings = 0
+
+		let bulbSetting = {}
+		let bulbIndex = i / 2;
+		bulbSettings[bulbIndex] = bulbSetting
+
+		let idx = i + ''
+		let idx2 = (i + 1) + ''
+		let weathers = []
+		if (hours[idx]) {
+			weathers.push(hours[idx].weather)
+			totalTemp += hours[idx].temp
+			numReadings++
+			if (hours[idx].pop > maxPop) {
+				maxPop = hours[idx].pop
+			}
+		}
+		if (hours[idx2]) {
+			weathers.push(hours[idx2].weather)
+			totalTemp += hours[idx2].temp
+			numReadings++
+			if (hours[idx2].pop > maxPop) {
+				maxPop = hours[idx2].pop
+			}
+		}
+		var avgTemp = totalTemp / numReadings
+		
+		var newHue = hueFromTemp(avgTemp, maxPop >= PRECIP_THRESHOLD);
+		var hueHue = Utils.hslHueToHueHue(newHue);
+
+		bulbSetting['averageWeather'] = averageWeather(weathers)
+		bulbSetting['start'] = hours[idx]['hour']
+		bulbSetting['end'] = hours[idx2]['hour']
+		bulbSetting['avgTemp'] = avgTemp
+		bulbSetting['pop'] = maxPop
+
+		let logline = `${bulbSetting['start']} - ${bulbSetting['end']}: Avg. temp  ${formatTemp(bulbSetting['avgTemp'])}C,  precip. chance ${String(Math.round(bulbSetting['pop'] * 100)).padStart(2, ' ')}%,  ${bulbSetting.averageWeather.description}`;
+		//console.log(logline)
+
+		console.log(Utils.colorizeForeground(Utils.hueToRgb(newHue), logline));
+
+		var bulbId = chandelierBulbs[bulbIndex].id;
+		var bulbBright = chandelierBulbs[bulbIndex].brightness;
+
+		Utils.setLightToHue(client, bulbId, bulbBright, hueHue);
+
+
+	}
+
+
+	//console.log(hours)
+
+}
+
 function setBedroomGlobeFromCurrentHourForecast(weather, isRaining, light) {
 	var nextHour = weather.hourly[0];
 	var temp = nextHour.temp;
@@ -154,6 +238,9 @@ function formatHour(mom) {
 	return mom.format('h A').padStart(5, ' ');
 }
 
+function hourFromHourlyWeather(hourlyWeather) {
+	return new Date(hourlyWeather.dt * 1000).getHours() % 12;
+}
 
 function hueFromTemp(temp, isRaining) {
 	if (temp > MAX_TEMP) {
