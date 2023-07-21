@@ -15,8 +15,8 @@ var config = require('./config.js');
 var client = config.huejay;
 
 var lights = [
-    {"id": 12, "brightness": 255}, // lamp
-//    {"id": 20, "brightness": 128}, // ceiling 1
+    {"id": 12, "brightness": 255}, // square desk lamp
+    {"id": 33, "brightness": 255}, // middle office ceiling
 //    {"id": 37, "brightness": 128} // ceiling 2
 ];
 
