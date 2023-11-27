@@ -27,12 +27,12 @@ const PRECIP_THRESHOLD = 0.4;
 
 
 let lights = [
-    {"id": 4, "brightness": 128}, // candle 8 o'clock
-    {"id": 7, "brightness": 128}, // 6 o'clock
-    {"id": 8, "brightness": 128}, // 4 o'clock
-    {"id": 9, "brightness": 128}, // 10 o'clock
-    {"id": 10, "brightness": 128}, // 12 o'clock
-    {"id": 11, "brightness": 128}, // 2 o'clock
+    {"id": 4, "brightness": 255}, // candle 8 o'clock
+    {"id": 7, "brightness": 255}, // 6 o'clock
+    {"id": 8, "brightness": 255}, // 4 o'clock
+    {"id": 9, "brightness": 255}, // 10 o'clock
+    {"id": 10, "brightness": 255}, // 12 o'clock
+    {"id": 11, "brightness": 255}, // 2 o'clock
     {"id": 32, "brightness": 128}, // upstairs hallway 3
     {"id": 33, "brightness": 128}, // upstairs hallway 4
     {"id": 31, "brightness": 128}, // bedroom globe
